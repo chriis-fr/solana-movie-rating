@@ -1,24 +1,27 @@
 import { Card } from './Card'
 import { FC, useEffect, useState } from 'react'
 import { Movie } from '../models/Movie'
+import * as web3 from '@solana/web3.js'
+import { MovieCoordinator } from '../models/MovieCoordinator'
 
-const MOVIE_REVIEW_PROGRAM_ID = 'CenYq6bDRB7p73EjsPEpiYN7uveyPUTdXkDkgUduboaN'
 
 export const MovieList: FC = () => {
+    const connection = new web3.Connection(web3.clusterApiUrl('devnet'))
     const [movies, setMovies] = useState<Movie[]>([])
+    const [page, setPage] = useState(1)
 
     useEffect(() => {
-        setMovies(Movie.mocks)
-    }, [])
+        MovieCoordinator.fetchPage(
+            connection,
+            page,
+            10
+        ).then(setMovies)
+    }, [page])
     
     return (
         <div>
             {
-                movies.map((movie, i) => {
-                    return (
-                        <Card key={i} movie={movie} />
-                    )
-                })
+                movies.map((movie, i) => <Card key={i} movie={movie} /> )
             }
         </div>
     )
