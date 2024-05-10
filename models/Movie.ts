@@ -11,6 +11,8 @@ export class Movie {
         this.description = description;
     }
 
+    
+
     static mocks: Movie[] = [
         new Movie('The Shawshank Redemption', 5, `For a movie shot entirely in prison where there is no hope at all, shawshank redemption's main massage and purpose is to remind us of hope, that even in the darkest places hope exists, and only needs someone to find it. Combine this message with a brilliant screenplay, lovely characters and Martin freeman, and you get a movie that can teach you a lesson everytime you watch it. An all time Classic!!!`),
         new Movie('The Godfather', 5, `One of Hollywood's greatest critical and commercial successes, The Godfather gets everything right; not only did the movie transcend expectations, it established new benchmarks for American cinema.`),
@@ -29,6 +31,27 @@ export class Movie {
         const buffer = Buffer.alloc(1000)
         this.borshInstructionSchema.encode({...this, variant: 0}, buffer)
         return buffer.slice(0, this.borshInstructionSchema.getSpan(buffer))
+    }
+
+    static borshAccountSchema = borsh.struct([
+        borsh.bool("initialized"),
+        borsh.u8("rating"),
+        borsh.str("title"),
+        borsh.str("description"),
+    ])
+
+    static deserialize(buffer? : Buffer): Movie|null {
+        if(!buffer){
+            return null
+        }
+
+        try {
+            const{title, rating, description} = this.borshAccountSchema.decode(buffer)
+            return new Movie(title, rating, description)
+        } catch (error) {
+            console.log("Deserialization Error:", error)
+            return null
+        }
     }
 }
 
